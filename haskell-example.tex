@@ -1,0 +1,308 @@
+%%% This is a LaTeX2e document.
+%%%
+%%% It documents the use of `haskell.sty'.
+%%%
+%%% Manuel M. T. Chakravarty <chak@cse.unsw.edu.au> [1998..2013]
+%%%
+%%% This file is available under a BSD3 licence - see the LICENSE file.
+
+\documentclass[a4paper]{article}
+
+\usepackage{a4}
+\usepackage{haskell}
+
+
+% backslash hack (uses the answer to Exercise 7.5 from Knuth's TeXbook)
+%
+{
+  \catcode`/=0 
+  \catcode`\\=13 
+  /gdef/backslashchar{/string\}
+}
+\newcommand{\cmd}[1]{\texttt{\backslashchar#1}}
+
+
+\begin{document}
+
+\title{Haskell for \LaTeX2e}
+\author{%
+  Manuel M. T. Chakravarty\\
+  School of Computer Science and Engineering\\
+  University of New South Wales, Australia\\[1ex]
+  \texttt{chak@cse.unsw.edu.au}\\
+  \texttt{www.cse.unsw.edu.au/\string~chak}
+  }
+\date{Version 1.0e (for Version 1.0e of the style file)}
+\maketitle
+
+
+\section{What's it good for?}
+
+Setting large pieces of code in an \texttt{verbatim} is ugly and makes it
+difficult to uses subscripts or set comments in a proportional type face.  On
+the other hand, the use of, for example, \TeX's math mode requires the use of
+additional macros to achieve proper kerning in multi-letter identifiers and to
+typeset application by juxtaposition.  The \texttt{haskell} style provides
+environments and macros that simplify setting Haskell~\cite{haskell,haskell14}
+programs in \LaTeX~\cite{lamport:latex}.  While the style is specifically
+geared towards Haskell, it should also be useful for other functional
+languages like ML or Nesl.
+
+The famous \<map\> function can be set as follows:
+%
+\begin{haskell*}
+  map          &::& (\alpha\to\beta)\to[\alpha]\to[\beta]
+  &\hscom{type assertion}\\
+  map f []     &=& []
+  &\hscom{\<[]\> is the empty list}\\
+  map f (x:xs) &=& f x : map f xs
+  &\hscom{\<:\> is the infix list constr.}
+\end{haskell*}
+%
+Under this definition, \<map (+1) [1, 2, 3]\> evaluates to \<[2, 3, 4]\>.
+
+The previous example was set using the following input:
+%
+\begin{quote}
+\begin{verbatim}
+The famous \<map\> function can be set as follows:
+%
+\begin{haskell*}
+  map          &::& (\alpha\to\beta)\to[\alpha]\to[\beta]
+  &\hscom{type assertion}\\
+  map f []     &=& []
+  &\hscom{\<[]\> is the empty list}\\
+  map f (x:xs) &=& f x : map f xs
+  &\hscom{\<:\> is the infix list constr.}
+\end{haskell*}
+%
+Under this definition, \<map (+1) [1, 2, 3]\> 
+evaluates to \<[2, 3, 4]\>.
+\end{verbatim}
+\end{quote}
+%
+There are a number of points worth noting.  In a Haskell phrase, math mode
+commands, such as \cmd{alpha} are available, but nevertheless, space
+characters can be used to denote juxtaposition of expressions (i.e.,
+application in Haskell) and multi-letter identifiers are set properly.
+Compare $ffoo$ and \<ffoo\>, set by \verb|$ffoo$| and \verb|\<ffoo\>|,
+respectively.
+
+\textit{The examples in the following sections do not provide the \LaTeX\ 
+  sources used to typeset the examples in the formatted version.  Please look
+  at the source file to see the code.}
+
+\section{Basic Usage}
+
+\subsection{Haskell Mode}
+
+The environment \texttt{haskell} as well as the commands \cmd< and \cmd> enter
+Haskell mode.  Keywords can be set in \textbf{bold face} using \cmd{hskwd}.
+Within a \texttt{haskell} environment, columns are defined using the alignment
+character \texttt{\&}.  Usually, it is not necessary to wrap relations into
+alignment characters, but instead a single alignment to the right of the
+relational symbol suffices (just like AMS\LaTeX's \texttt{align}
+environment).  However, sometimes we want to align relational symbols of
+different size (i.e., the \<::\> of a type assertion and the \<=\> of the
+corresponding equations).  In this case, the star form \texttt{haskell*}
+should be used, which centers the material enclosed between the first and
+second alignment character.
+
+\subsection{Comments}
+
+The unary command \cmd{hscom} is used to set single line comments.
+%
+\begin{haskell*}
+  \hskwd{data} Maybe \alpha
+  & = & Nothing      &\hscom{No result}\\
+  & | & Just \alpha  &\hscom{Just a value of type \<\alpha\>}
+\end{haskell*}
+%
+The second line shows that in a comment, you can again enter Haskell mode.
+This is particularly important when identifiers appear in comments or when you 
+want to cite some program fragement, as the font choice in these cases should
+be identical to the fonts in the displayed program.
+
+Sometimes, we like to omit some details of an algorithm and instead give an
+informal description.  This is achieved with \cmd{hsinf}.
+%
+\begin{haskell}
+  main &= \hsdo{
+    config \hsfrom \hsinf{read the configuration file}\\
+    result \hsfrom \hsinf{process the input according to \<config\>}\\
+    putStr result
+    }
+\end{haskell}
+
+\subsection{Features from Math Mode}
+
+You can use all sorts of symbols, subscripts, and superscripts from \LaTeX's
+math mode in Haskell mode.  This includes \TeX's relational symbols, for
+example, $\geq$ or $\not=$, and greek characters for type variables.
+
+\subsection{Aligned Material}
+
+Larger function bodies usually require the use of aligned subphrases to
+visually structure the definition.  The command \cmd{hsalign} generates an
+alignment with an arbitrary number of columns. Consider the function
+\<transpose\> from Haskell's standard library:
+%
+\begin{haskell*}
+transpose &::& [[a]]\to [[a]]\\
+transpose &=&
+\hsalign{
+  foldr\\
+  \quad(\lambda xs xss\to zipWith (:) xs (xss\hsapp repeat []))\\
+  \quad[]
+  }
+\end{haskell*}
+
+For several constructs that require alignments, there are predefined macros
+internally using \cmd{hsalign}.  For example for \<\hskwd{let}\> expressions,
+we have \cmd{hslet}:
+%
+\begin{haskell}
+  foo a = \hslet{
+    x &= 1\\
+    y &= 2
+    }{%
+    x+y
+    }
+\end{haskell}
+%
+Another macros is \cmd{hsif} for if-then-else expression.  In the following,
+example, we see that aligned subphrases can be nested:
+%
+\begin{haskell}
+  foo a = \hsif{a == 0}{%
+    \hslet{%
+      x = a + 1
+      }{%
+      x}
+    }{%
+    a}
+\end{haskell}
+
+Aligned material frequently gets big enough to require to break the
+surrounding alignment.  This achieved with \cmd{hsbody}:
+%
+\begin{haskell*}
+  calculateNextPos &::& Pos\to Mover\to State\to [Pos]\\
+  calculateNextPos oldPos move state &=&\relax
+  \hsbody{%
+    map &(\lambda (lowerHalf, upperHalf)\to (upperHalf, lowerHalf)\\
+        &(compare oldPos (move state))
+    }
+\end{haskell*}
+
+A canned use of \cmd{hsbody} is provided by \cmd{hswhere} for
+\<\hskwd{where}\> clauses:
+%
+\begin{haskell*}
+partition       &::& (a\to Bool)\to [a]\to ([a],[a])\\
+partition p xs  &=& foldr select ([],[]) xs
+\hswhere{%
+  select x (ts,fs) &\mid p x       &= (x:ts,fs)\\
+                   &\mid otherwise &= (ts, x:fs)
+  }
+\end{haskell*}
+
+
+\section{Advanced Features}
+
+If you need to set complex documents, you may want to know some of the more
+subtle points of the Haskell mode.  Generally, whenever you attempt to use
+Haskell mode in sophistcated ways or try to define your own commands, keep in
+mind that spaces matter in Haskell mode, i.e., Haskell mode uses \TeX's
+\cmd{obeyspaces}.  This changes \TeX's behaviour in subtle ways.
+
+\subsection{Defining Commands}
+
+Commands that are used in Haskell mode should be defined with \cmd{hscommand}
+instead of \cmd{newcommand}.  The arguments expected by \cmd{hscommand} are
+the same as those for \cmd{newcommand} (however, there is no \texttt*-version
+of \cmd{hscommand}).  \cmd{hscommand} works slightly different, for example,
+with respect to processing spaces in the body of the command definition, to
+allow application by juxtaposition.
+
+\subsection{Entering ``Real'' Math Mode}
+
+Haskell mode is rather similar to math mode, to allow using special
+characters, subscripts, and so forth.  However, sometimes, it is desirable to
+enter plain math mode.  Within a Haskell phrase, the commands \cmd( and \cmd)
+may be used to enter \LaTeX's standard math mode.  This is often helpful, when
+defining macros\footnote{Sometimes it may be necessary to prefix such a use
+  of \cmd( by \cmd{relax}, when the macro is used behind a \texttt{\string&}.}
+and, for example, the macro \cmd{hscom} is defined this way.
+
+\subsection{Use in Transformation Rules}
+
+For example in transformation rules, we want complex expressions, such as
+let-in constructs to be vertically centered.  This is achieved by specifying
+an optional argument giving the alignment, for example,
+\cmd{hslet[c]\{$\cdots$\}}. 
+%
+\begin{haskell}
+  \hslet[c]{%
+    x &= e
+    }{C[x]}
+  \Longrightarrow
+  C[e]
+\end{haskell}
+%
+By default boxes are vertically aligned by the baseline of the first line
+(corresponding to the option \texttt{t}).  Using \texttt{c} the alignment is
+in the center and with \texttt{b} it is at the baseline of the last line.
+
+\subsection{\TeX's Formula Parser}
+
+\TeX\ is capable of understanding some of the structure of formulae in math
+mode.  The parsed structure influences the space inserted between the elements 
+of a formula.  Compare 
+%
+\begin{quote}
+  \begin{tabular}{l@{~$\Longrightarrow$~}l}
+    \texttt{3+4}     & \(3+4\)\quad and\\
+    \texttt{3\{+\}4} & \(3{+}4\)
+  \end{tabular}
+\end{quote}
+%
+In the first case, \TeX\ groks that \texttt{+} is a binary operator applied to
+$3$ and $4$, but not in the second.  Details are provided in \emph{The
+  \TeX{}book}~\cite{knuth:tex}.
+
+%\section{Tests}
+
+%\begin{haskell}
+%foo x_1 &= x_1 + 10 &\hscom{\<x_1\> is increased by \<10\>}
+%\end{haskell}
+
+%\begin{haskell}
+%  foo x &=& \hslet{
+%    y &=\hsif{x == 0}{bar 1}{%
+%      \hslet{%
+%        z & = foobar x 5 + x
+%        }{
+%        foo' z}}
+%    }{
+%    bar' y}
+%  \\
+%  foo x &=& \hslet{
+%    y &=\hsif{x == 0}{bar 1}{%
+%      \hslet{%
+%        z & = foobar x 5 + x
+%        }{
+%        foo' z}}
+%    }{
+%    bar' y}
+%\end{haskell}
+
+
+\section{BSD3}
+
+The Haskell mode is available under a BSD3 license.
+
+\bibliographystyle{alpha}
+\bibliography{haskell-example}
+
+\end{document}

@@ -1,2 +1,10 @@
 
 old/*
+
+*.aux
+
+*.bbl
+
+*.blg
+
+*.log
